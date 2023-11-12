@@ -14,4 +14,20 @@ export class SpotifyTrackService {
     const url = `http://localhost:3001/Music/search/${keyword}`;
     return this.http.get<SpotifyTrack[]>(url);
   }
+
+
+  // selectTrack(track: SpotifyTrack, selectedTrack: SpotifyTrack | null = null, showContent: boolean) {
+  //   selectedTrack = track;
+  //   localStorage.setItem('selectedTrack', JSON.stringify(track));
+  //   showContent = true;
+  //   console.log('Selected Track:', selectedTrack);
+  //   return selectedTrack;
+  // }
+
+
+  selectTrack(track: SpotifyTrack, selectedTrack: SpotifyTrack | null = null): void{
+    selectedTrack = track;
+    localStorage.setItem('selectedTrack', JSON.stringify(track));
+  }
+
 }

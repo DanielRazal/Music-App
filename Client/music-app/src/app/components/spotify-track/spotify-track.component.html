@@ -32,19 +32,20 @@
                                     <p><strong>Name:</strong> {{ selectedTrack.name }}</p>
                                     <p><strong>Artists:</strong> {{ selectedTrack.artists }}</p>
                                     <p><strong>Album:</strong> {{ selectedTrack.album }}</p>
+
                                     <p *ngIf="selectedTrack.preview_url">
-                                        <span class="cursor-pointer"
-                                            (click)="toggleAudio(selectedTrack.preview_url, selectedTrack.id, i)">
-                                            <mat-icon>{{ isPlaying[i] ? 'stop' : 'play_arrow' }}</mat-icon>
+                                        <span class="cursor-pointer" (click)="toggleAudio()">
+                                            <mat-icon>{{ isPlaying ? 'stop' : 'play_arrow' }}</mat-icon>
                                         </span>
-                                        {{ currentTimeDisplay }}
+                                        {{currentTimeDisplay}} / {{endTimeDisplay}}
                                     </p>
                                 </div>
                                 <div class="flex justify-center mt-4">
 
                                     <button mat-mini-fab color="warn"
                                         aria-label="Example icon button with a filter list icon"
-                                        (click)="closeModal(selectedTrack.id)"><mat-icon>close</mat-icon> </button>
+                                        (click)="closeModal()"><mat-icon>close</mat-icon> </button>
+
 
                                 </div>
                             </div>
@@ -55,6 +56,14 @@
         </ul>
     </mat-card-content>
 </mat-card>
+
+<!-- <p *ngIf="selectedTrack.preview_url">
+                                        <span class="cursor-pointer"
+                                            (click)="toggleAudio(selectedTrack.preview_url, selectedTrack.id, i)">
+                                            <mat-icon>{{ isPlaying[i] ? 'stop' : 'play_arrow' }}</mat-icon>
+                                        </span>
+                                        {{ currentTimeDisplay }}
+                                    </p> -->
 
 <!-- <div *ngIf="showContent" class="modal-overlay">
     <div class="modal-content">
