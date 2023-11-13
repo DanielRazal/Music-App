@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SpotifyTrack } from 'src/app/models/SpotifyTrack';
+import { AudioService } from 'src/app/services/audio.service';
 import { SpotifyTrackService } from 'src/app/services/spotify-track.service';
 
 @Component({
@@ -7,6 +8,7 @@ import { SpotifyTrackService } from 'src/app/services/spotify-track.service';
   templateUrl: './spotify-track.component.html',
   styleUrls: ['./spotify-track.component.css']
 })
+
 export class SpotifyTrackComponent implements OnInit {
 
   spotifyTrack: SpotifyTrack[] = [];
@@ -17,7 +19,7 @@ export class SpotifyTrackComponent implements OnInit {
   isPlaying: boolean = false
   isInputFocused: boolean = false;
 
-  constructor(private spotifyService: SpotifyTrackService) { }
+  constructor(private spotifyService: SpotifyTrackService, private audioService: AudioService) { }
 
   ngOnInit(): void {
     this.searchSongs(this.keyword);
@@ -59,34 +61,27 @@ export class SpotifyTrackComponent implements OnInit {
   }
 
 
-
   selectTrack(track: SpotifyTrack): void {
     this.selectedTrack = track;
     localStorage.setItem('selectedTrack', JSON.stringify(track));
     this.showContent = true;
   }
 
-  private pausedTime: number = 0;
+  private pausedTime: number = 28;
 
   currentTimeDisplay: string = '00:00';
-  endTimeDisplay: string = '00:29'; 
+  endTimeDisplay: string = '00:29';
 
 
   playAudio(track: SpotifyTrack): void {
-    if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.pausedTime = this.currentAudio.currentTime;
-    }
 
-    this.currentAudio = new Audio(track.preview_url);
-    this.currentAudio.currentTime = this.pausedTime;
-    this.currentAudio.play();
+    this.currentAudio = this.audioService.playAudio(track);
 
-    this.currentAudio.addEventListener('timeupdate', () => {
+    this.currentAudio!.addEventListener('timeupdate', () => {
       this.updateTimeDisplays();
     });
 
-    this.currentAudio.addEventListener('ended', () => {
+    this.currentAudio!.addEventListener('ended', () => {
       this.isPlaying = false;
       this.updateTimeDisplays();
     });
@@ -97,30 +92,47 @@ export class SpotifyTrackComponent implements OnInit {
       const minutes = Math.floor(this.currentAudio.currentTime / 60);
       const seconds = Math.floor(this.currentAudio.currentTime % 60);
       this.currentTimeDisplay = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  
+
       const maxDuration = 29;
       if (this.currentAudio.currentTime >= maxDuration) {
         this.resetAudio();
       }
     }
   }
-  
+
   resetAudio(): void {
     if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio.currentTime = 0;
+      this.currentAudio = this.audioService.resetAudio();
       this.isPlaying = false;
     }
   }
 
   toggleAudio(): void {
     if (this.isPlaying) {
-      this.currentAudio?.pause();
-      this.pausedTime = this.currentAudio?.currentTime || 0;
+      this.currentAudio = this.audioService.resetAudio();
     } else if (this.selectedTrack) {
       this.playAudio(this.selectedTrack);
     }
 
     this.isPlaying = !this.isPlaying;
   }
+
+  volumeValue: number = 0.5;
+
+
+  onVolumeChange(): void {
+    if (this.currentAudio) {
+      this.currentAudio.volume = this.volumeValue;
+    }
+  }
+
+  secondsValue: number = 0;
+
+  onSecondsChange(): void {
+    if (this.currentAudio) {
+      this.currentAudio.currentTime = this.secondsValue;
+      this.updateTimeDisplays();
+    }
+  }
+
 }

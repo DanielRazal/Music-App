@@ -11,7 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatSliderModule } from '@angular/material/slider';
-import {MatButtonModule} from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
+import { AudioService } from './services/audio.service';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,7 @@ import {MatButtonModule} from '@angular/material/button';
     MatSliderModule,
     MatButtonModule
   ],
-  providers: [],
+  providers: [AudioService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
