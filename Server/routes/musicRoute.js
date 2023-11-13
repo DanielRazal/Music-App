@@ -2,11 +2,12 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 const getAccessToken = require('../token/getToken');
+const asyncHandler = require("../helpers/asyncHandler");
 
 require('dotenv').config();
 
 // Search tracks route
-router.get('/search/:keyword', async (req, res) => {
+router.get('/search/:keyword', asyncHandler(async (req, res) => {
 
     const { keyword } = req.params;
 
@@ -45,7 +46,7 @@ router.get('/search/:keyword', async (req, res) => {
         console.error('Error searching tracks:', error.message);
         res.status(500).send('Internal Server Error');
     }
-});
+}));
 
 module.exports = router;
 
