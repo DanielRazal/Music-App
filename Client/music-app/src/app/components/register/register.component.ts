@@ -1,6 +1,9 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AlertService } from 'src/app/services/alert.service';
+import { ErrorService } from 'src/app/services/error.service';
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
@@ -14,7 +17,8 @@ export class RegisterComponent implements OnInit {
 
 
   constructor(private formBuilder: FormBuilder, private userService: UserService
-    , private router: Router) { }
+    , private router: Router, private alertService: AlertService
+    , private errorService: ErrorService) { }
 
 
   ngOnInit(): void {
@@ -24,11 +28,14 @@ export class RegisterComponent implements OnInit {
     });
   }
 
-
   onSubmit() {
     this.userService.register(this.registerForm.value).subscribe((res) => {
       this.router.navigate(['login']);
       this.registerForm.reset();
-    }, (error) => {  });
+      this.alertService.success('Success', res.message, `Status code: ${res.statusCode}`);
+    }, (error) => {
+      this.errorService.errorsRegister(error);
+    }
+    )
   }
 }

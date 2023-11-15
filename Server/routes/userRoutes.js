@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const asyncHandler = require("../helpers/asyncHandler");
 const User = require('../models/user');
-// const handleErrors = require("../errors/handleErrors");
+const handleErrors = require("../errors/handleErrors");
 const jwtToken = require("../token/jwtToken");
 
 // Getting all
@@ -20,17 +20,15 @@ router.post('/Login', async (req, res) => {
     const user = new User(req.body);
     const users = await User.find();
     const userLogin = users.find(u => u.userName === user.userName && u.password === user.password);
-    
+
     try {
         if (!userLogin) {
             return res.status(404).json({ message: 'User not found' });
         }
         else {
             const token = jwtToken(userLogin);
-            return res.status(200).json({ message: 'Login successful', token, userLogin });
+            return res.status(200).json({ message: 'Login successful', token, userLogin, statusCode: 200 });
         }
-
-
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: 'An error occurred during login' });
@@ -45,17 +43,17 @@ router.post('/Register', asyncHandler(async (req, res) => {
     const existingUser = await User.findOne({ userName });
 
     if (existingUser) {
-        return res.status(400).json({ message: 'Username already exists' });
+        return res.status(401).json({ message: 'Username already exists' });
     }
 
     const newUser = new User({ userName, password });
 
     try {
         const savedUser = await newUser.save();
-        res.status(201).json(savedUser);
+        res.status(200).json({ savedUser, message: 'Registration successful', statusCode: 200 });
 
     } catch (err) {
-        // handleErrors(err, res);
+        handleErrors(err, res);
     }
 }));
 
@@ -97,8 +95,6 @@ router.delete('/:id', asyncHandler(async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 }));
-
-
 
 // Updating One
 router.patch('/:id', asyncHandler(async (req, res) => {

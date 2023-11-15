@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SpotifyTrack } from 'src/app/models/SpotifyTrack';
 import { AudioService } from 'src/app/services/audio.service';
 import { SpotifyTrackService } from 'src/app/services/spotify-track.service';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-spotify-track',
@@ -18,13 +19,19 @@ export class SpotifyTrackComponent implements OnInit {
   selectedTrack: SpotifyTrack | null = null;
   isPlaying: boolean = false
   isInputFocused: boolean = false;
+  currentTimeDisplay: string = '00:00';
+  endTimeDisplay: string = '00:29';
+  volumeValue: number = 0.5;
+  secondsValue: number = 0;
 
-  constructor(private spotifyService: SpotifyTrackService, private audioService: AudioService) { }
+  constructor(private spotifyService: SpotifyTrackService, private audioService: AudioService
+    , private cookieService: CookieService) { }
 
   ngOnInit(): void {
     this.searchSongs(this.keyword);
 
-    const storedTrack = localStorage.getItem('selectedTrack');
+    const storedTrack = this.cookieService.get('selectedTrack');
+
     if (storedTrack) {
       this.selectedTrack = JSON.parse(storedTrack);
     }
@@ -51,7 +58,8 @@ export class SpotifyTrackComponent implements OnInit {
 
   closeModal(): void {
     this.showContent = false;
-    localStorage.clear();
+
+    this.cookieService.deleteAll()
     this.isPlaying = false;
 
     if (this.currentAudio) {
@@ -63,18 +71,11 @@ export class SpotifyTrackComponent implements OnInit {
 
   selectTrack(track: SpotifyTrack): void {
     this.selectedTrack = track;
-    localStorage.setItem('selectedTrack', JSON.stringify(track));
+    this.cookieService.set('selectedTrack', JSON.stringify(track))
     this.showContent = true;
   }
 
-  private pausedTime: number = 28;
-
-  currentTimeDisplay: string = '00:00';
-  endTimeDisplay: string = '00:29';
-
-
   playAudio(track: SpotifyTrack): void {
-
     this.currentAudio = this.audioService.playAudio(track);
 
     this.currentAudio!.addEventListener('timeupdate', () => {
@@ -117,7 +118,6 @@ export class SpotifyTrackComponent implements OnInit {
     this.isPlaying = !this.isPlaying;
   }
 
-  volumeValue: number = 0.5;
 
 
   onVolumeChange(): void {
@@ -126,7 +126,6 @@ export class SpotifyTrackComponent implements OnInit {
     }
   }
 
-  secondsValue: number = 0;
 
   onSecondsChange(): void {
     if (this.currentAudio) {
@@ -134,5 +133,4 @@ export class SpotifyTrackComponent implements OnInit {
       this.updateTimeDisplays();
     }
   }
-
 }

@@ -39,8 +39,4 @@ export class AudioService {
 
     return this.currentAudio
   }
-
-  toggleAudio() {
-
-  }
 }
