@@ -12,7 +12,8 @@ import { CookieService } from 'ngx-cookie-service';
 
 export class SpotifyTrackComponent implements OnInit {
 
-  spotifyTrack: SpotifyTrack[] = [];
+  spotifyTracks: SpotifyTrack[] = [];
+  spotifyTrack!: SpotifyTrack;
   keyword: string = "";
   currentAudio: HTMLAudioElement | null = null;
   showContent: boolean = false;
@@ -23,6 +24,9 @@ export class SpotifyTrackComponent implements OnInit {
   endTimeDisplay: string = '00:29';
   volumeValue: number = 0.5;
   secondsValue: number = 0;
+  showVolumeIcon: boolean = false;
+  userId: string = "";
+  isFavorite: boolean = false;
 
   constructor(private spotifyService: SpotifyTrackService, private audioService: AudioService
     , private cookieService: CookieService) { }
@@ -31,18 +35,23 @@ export class SpotifyTrackComponent implements OnInit {
     this.searchSongs(this.keyword);
 
     const storedTrack = this.cookieService.get('selectedTrack');
+    this.userId = this.cookieService.get('userId');
+
 
     if (storedTrack) {
       this.selectedTrack = JSON.parse(storedTrack);
     }
+
+    setInterval(() => {
+      this.updateSliderPosition();
+    }, 1000);
   }
 
   searchSongs(keyword: string) {
     this.spotifyService.searchSongs(keyword).subscribe((spotifyTrack) => {
-      this.spotifyTrack = spotifyTrack;
+      this.spotifyTracks = spotifyTrack;
     })
   }
-
 
   onInputFocus() {
     this.isInputFocused = true;
@@ -59,13 +68,15 @@ export class SpotifyTrackComponent implements OnInit {
   closeModal(): void {
     this.showContent = false;
 
-    this.cookieService.deleteAll()
+    this.cookieService.delete("selectedTrack")
     this.isPlaying = false;
 
     if (this.currentAudio) {
       this.currentAudio.pause();
       this.currentAudio.currentTime = 0;
     }
+    this.volumeValue = 0.5;
+    this.secondsValue = 0;
   }
 
 
@@ -110,7 +121,7 @@ export class SpotifyTrackComponent implements OnInit {
 
   toggleAudio(): void {
     if (this.isPlaying) {
-      this.currentAudio = this.audioService.resetAudio();
+      this.currentAudio!.pause();
     } else if (this.selectedTrack) {
       this.playAudio(this.selectedTrack);
     }
@@ -118,19 +129,73 @@ export class SpotifyTrackComponent implements OnInit {
     this.isPlaying = !this.isPlaying;
   }
 
-
-
   onVolumeChange(): void {
     if (this.currentAudio) {
       this.currentAudio.volume = this.volumeValue;
     }
   }
 
+  updateSliderPosition(): void {
+    if (this.currentAudio) {
+      this.secondsValue = this.currentAudio.currentTime;
+    }
+  }
 
   onSecondsChange(): void {
     if (this.currentAudio) {
       this.currentAudio.currentTime = this.secondsValue;
       this.updateTimeDisplays();
     }
+  }
+
+  onSliderMouseEnter(): void {
+    this.showVolumeIcon = true;
+  }
+
+  onSliderMouseLeave(): void {
+    this.showVolumeIcon = false;
+  }
+
+  isMuted: boolean = false;
+  previousVolumeValue: number = 0;
+
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+
+    this.volumeValue = this.isMuted ? 0 : 0.5;
+  }
+
+  getVolumeIcon(): string {
+    if (this.isMuted || this.volumeValue === 0) {
+      return 'volume_off';
+    } else if (this.volumeValue < 0.5) {
+      return 'volume_down';
+    } else {
+      return 'volume_up';
+    }
+  }
+
+  addFavoriteSong() {
+    try {
+      this.spotifyTrack = JSON.parse(this.cookieService.get('selectedTrack'));
+    } catch (error) {
+      console.error('Error parsing JSON from cookie:', error);
+      return;
+    }
+
+    this.spotifyService.addFavoriteSong(this.userId, this.spotifyTrack).subscribe(
+      (spotifyTrack: SpotifyTrack) => {
+        this.spotifyTrack = spotifyTrack;
+        console.log('Song added to favorites:', this.spotifyTrack);
+      },
+      (error) => {
+        console.error('Error adding favorite song:', error);
+      }
+    );
+  }
+
+  toggleFavorite() {
+    this.isFavorite = !this.isFavorite;
+    this.addFavoriteSong();
   }
 }

@@ -32,7 +32,7 @@ export class LoginComponent {
       .subscribe((res) => {
 
         this.cookieService.set('token', res.token)
-        this.cookieService.set('user', JSON.stringify(res.userLogin))
+        this.cookieService.set('userId', JSON.stringify(res.userLogin._id))
 
         this.router.navigate(['spotify']);
         this.loginForm.reset();

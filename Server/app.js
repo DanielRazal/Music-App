@@ -20,7 +20,7 @@ db.once('open', () => console.log('Connected to Database'));
 
 const corsOptions = {
     origin: 'http://localhost:4200',
-    credentials: true, 
+    credentials: true,
 };
 
 app.use(cors(corsOptions));
