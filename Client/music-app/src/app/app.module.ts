@@ -15,13 +15,20 @@ import { MatButtonModule } from '@angular/material/button';
 import { AudioService } from './services/audio.service';
 import { RegisterComponent } from './components/register/register.component';
 import { LoginComponent } from './components/login/login.component';
+import { MyFavoriteSongsComponent } from './components/my-favorite-songs/my-favorite-songs.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MenuComponent } from './components/menu/menu.component';
+import { SearchSongsComponent } from './components/search-songs/search-songs.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SpotifyTrackComponent,
     RegisterComponent,
-    LoginComponent
+    LoginComponent,
+    MyFavoriteSongsComponent,
+    MenuComponent,
+    SearchSongsComponent
   ],
   imports: [
     BrowserModule,
@@ -34,7 +41,8 @@ import { LoginComponent } from './components/login/login.component';
     MatCardModule,
     MatSliderModule,
     MatButtonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatSelectModule
   ],
   providers: [AudioService],
   bootstrap: [AppComponent]

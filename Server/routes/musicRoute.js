@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 
 require('dotenv').config();
 
-// Search tracks route
 router.get('/search/:keyword', asyncHandler(async (req, res) => {
 
     const { keyword } = req.params;
@@ -50,59 +49,112 @@ router.get('/search/:keyword', asyncHandler(async (req, res) => {
 
 router.delete('/', async (req, res) => {
     try {
-        // Use deleteMany to delete all documents in the 'songs' collection
         const result = await Song.deleteMany({});
 
-        console.log(`${result.deletedCount} songs deleted.`);
-
         res.send(`${result.deletedCount} songs deleted.`);
+
     } catch (error) {
         console.error('Error deleting songs:', error.message);
         res.status(500).send('Internal Server Error');
     }
 });
 
-
 router.post('/:userId', asyncHandler(async (req, res) => {
-    const { id, name, artists, album, preview_url, isFavorite, image, songId } = req.body;
-    const { userId } = req.params;
+    const { id, name, artists, album, preview_url, image } = req.body;
+    let userId = req.params.userId;
+
+    userId = userId.replace(/"/g, '');
 
     try {
-        if (!mongoose.Types.ObjectId.isValid(userId)) {
-            return res.status(400).send('Invalid user ID.');
-        }
 
-        const userIdAsObjectId = mongoose.Types.ObjectId(userId);
-
-        // Check if a song with the given songId and userId already exists
-        const existingSong = await Song.findOne({ songId, user: userIdAsObjectId });
+        const existingSong = await Song.findOne({ user: userId, songId: id });
 
         if (existingSong) {
-            // If the song already exists, send a response indicating that it's not added again
-            return res.status(200).send('Song already exists for the user, not added again.');
+            return res.status(200).send({ message: 'Song is already in favorites!' });
         }
 
-        // If isFavorite is true and the song doesn't exist, add the song to MongoDB
         const newSong = new Song({
-            id,
             name,
             artists,
             album,
             preview_url,
-            isFavorite,
+            isFavorite: true,
             image,
-            songId,
-            user: userIdAsObjectId,
+            user: userId,
+            songId: id
         });
 
         await newSong.save();
 
-        res.status(201).send('Song added to favorites!');
+        res.status(201).send({ message: 'Song added to favorites!' });
     } catch (error) {
         console.error('Error adding song to favorites:', error.message);
         res.status(500).send('Internal Server Error');
     }
 }));
+
+
+router.patch('/:userId/:songId', asyncHandler(async (req, res) => {
+    const { isFavorite } = req.body;
+    let userId = req.params.userId;
+    const songId = req.params.songId;
+    userId = userId.replace(/"/g, '');
+
+    try {
+        const updatedSong = await Song.findOneAndUpdate(
+            { user: userId, songId: songId },
+            { $set: { isFavorite: isFavorite } },
+            { new: true }
+        );
+
+        if (!updatedSong) {
+            return res.status(404).send({ message: 'Song not found for the specified user and songId.' });
+        }
+
+        res.status(200).send({ message: 'isFavorite status updated successfully.', updatedSong });
+
+    } catch (error) {
+        console.error('Error updating isFavorite status:', error.message);
+        res.status(500).send('Internal Server Error');
+    }
+}));
+
+router.get('/:userId', asyncHandler(async (req, res) => {
+    try {
+        const userId = req.params.userId.replace(/"/g, '');
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(404).send({ message: 'User not found for the specified id.' });
+        }
+
+        const songs = await Song.find({ user: userId });
+
+        res.status(200).send(songs);
+    } catch (error) {
+        console.error('Error retrieving songs:', error.message);
+        res.status(500).send('Internal Server Error');
+    }
+}));
+
+
+router.delete('/:id', asyncHandler(async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404).send({ message: 'Songs not found for the specified id.' });
+        }
+
+        const deletedSong = await Song.findOneAndDelete({ _id: id });
+
+        res.status(200).send({ message: 'Song deleted successfully.', deletedSong });
+
+    } catch (error) {
+        console.error('Error deleting song:', error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}));
+
 
 module.exports = router;
 

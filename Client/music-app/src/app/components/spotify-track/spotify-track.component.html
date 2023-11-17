@@ -1,91 +1,176 @@
-<!-- <input type="text" id="searchInput" [(ngModel)]="keyword" />
-<button (click)="searchSongs(keyword)">Search</button>
- -->
-
 <div class="flex justify-center items-center relative top-10">
-    <mat-form-field>
-        <mat-label *ngIf="!isInputFocused && !keyword">Search</mat-label>
-        <input matInput placeholder="Enter your search term" type="text" [(ngModel)]="keyword" (focus)="onInputFocus()"
-            (blur)="onInputBlur()" class="text-sm" />
-        <mat-icon matSuffix (click)="searchSongs(keyword);" class="cursor-pointer">search</mat-icon>
-    </mat-form-field>
+    <ng-container *ngIf="isSearchPage">
+        <mat-form-field class="mr-10">
+            <mat-label *ngIf="!isInputFocused && !keyword">Search</mat-label>
+            <input matInput placeholder="Enter your search term" type="text" [(ngModel)]="keyword"
+                (focus)="onInputFocus()" (blur)="onInputBlur()" class="text-sm" />
+            <mat-icon matSuffix (click)="searchSongs(keyword);" class="cursor-pointer">search</mat-icon>
+        </mat-form-field>
+    </ng-container>
+
+    <app-menu></app-menu>
 </div>
 
-<mat-card *ngIf="spotifyTracks.length > 0" class="relative top-5">
-    <mat-card-content>
-        <ul class="list-none p-0 flex flex-wrap">
-            <li *ngFor="let track of spotifyTracks; let i = index"
-                class="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/4">
-                <mat-card-content class="flex items-center">
-                    <img *ngIf="track.image" [src]="track.image" alt="Album Art" class="mr-4 w-52 h-52 cursor-pointer"
-                        (click)="selectTrack(track)" />
 
-                    <div *ngIf="showContent" class="modal-overlay">
-                        <div class="modal-content w-2/5">
-                            <div *ngIf="selectedTrack">
-                                <div class="flex justify-center">
-                                    <img *ngIf="selectedTrack.image" [src]="selectedTrack.image" alt="Album Art"
-                                        class="mr-4 w-52 h-52 cursor-pointer">
-                                </div>
-                                <div class="mt-4">
+<div *ngIf="isSearchPage">
+    <mat-card *ngIf="spotifyTracks.length > 0" class="relative mt-10">
+        <mat-card-content>
+            <ul class="list-none p-0 flex flex-wrap">
+                <li *ngFor="let track of spotifyTracks; let i = index"
+                    class="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/4">
+                    <mat-card-content class="flex items-center">
+                        <img *ngIf="track.image" [src]="track.image" alt="Album Art"
+                            class="mr-4 w-52 h-52 cursor-pointer" (click)="selectTrack(track)" />
+                        <div *ngIf="showContent" class="modal-overlay">
+                            <div class="modal-content w-2/5">
+                                <div *ngIf="selectedTrack">
+                                    <div class="flex justify-center">
+                                        <img *ngIf="selectedTrack.image" [src]="selectedTrack.image" alt="Album Art"
+                                            class="mr-4 w-52 h-52 cursor-pointer">
+                                    </div>
+                                    <div class="mt-4">
 
-                                    <p><strong>Name:</strong> {{ selectedTrack.name }}</p>
-                                    <p><strong>Artists:</strong> {{ selectedTrack.artists }}</p>
-                                    <p><strong>Album:</strong> {{ selectedTrack.album }}</p>
+                                        <p><strong>Name:</strong> {{ selectedTrack.name }}</p>
+                                        <p><strong>Artists:</strong> {{ selectedTrack.artists }}</p>
+                                        <p><strong>Album:</strong> {{ selectedTrack.album }}</p>
 
 
-                                    <mat-card class="w-full h-12 mt-3 rounded-full" *ngIf="selectedTrack.preview_url">
-                                        <div class="flex items-center h-full">
+                                        <mat-card class="w-full h-12 mt-3 rounded-full"
+                                            *ngIf="selectedTrack.preview_url">
+                                            <div class="flex items-center h-full">
 
-                                            <button mat-icon-button class="cursor-pointer flex items-center"
-                                                (click)="toggleAudio()">
-                                                <mat-icon>{{ isPlaying ? 'stop' : 'play_arrow' }}</mat-icon>
-                                            </button>
-
-                                            <span class="ml-2">
-                                                {{currentTimeDisplay}} / {{endTimeDisplay}}
-                                            </span>
-
-                                            <span class="ml-2">
-                                                <mat-slider min="0" max="29" step="1" class="mt-3">
-                                                    <input matSliderThumb [(ngModel)]="secondsValue"
-                                                        (input)="onSecondsChange()">
-                                                </mat-slider>
-                                            </span>
-
-                                            <span (mouseenter)="onSliderMouseEnter()"
-                                                (mouseleave)="onSliderMouseLeave()">
-                                                <button mat-icon-button class="volume cursor-pointer"
-                                                    (dblclick)="toggleMute()">
-                                                    <mat-icon>{{ getVolumeIcon() }}</mat-icon>
+                                                <button mat-icon-button class="cursor-pointer flex items-center"
+                                                    (click)="toggleAudio()">
+                                                    <mat-icon>{{ isPlaying ? 'stop' : 'play_arrow' }}</mat-icon>
                                                 </button>
-                                                <div class="ml-12">
-                                                    <mat-slider min="0" max="1" step="0.1" *ngIf="showVolumeIcon">
-                                                        <input matSliderThumb (input)="onVolumeChange()"
-                                                            [(ngModel)]="volumeValue">
+
+                                                <span class="ml-2">
+                                                    {{currentTimeDisplay}} / {{endTimeDisplay}}
+                                                </span>
+
+                                                <span class="ml-2">
+                                                    <mat-slider min="0" max="29" step="1" class="mt-3">
+                                                        <input matSliderThumb [(ngModel)]="secondsValue"
+                                                            (input)="onSecondsChange()">
                                                     </mat-slider>
-                                                </div>
-                                            </span>
-                                        </div>
-                                        <div class="flex justify-center">
-                                            <button mat-icon-button class="cursor-pointer"
-                                                (click)="toggleFavorite()">
+                                                </span>
+
+                                                <span (mouseenter)="onSliderMouseEnter()"
+                                                    (mouseleave)="onSliderMouseLeave()">
+                                                    <button mat-icon-button class="volume cursor-pointer"
+                                                        (dblclick)="toggleMute()">
+                                                        <mat-icon>{{ getVolumeIcon() }}</mat-icon>
+                                                    </button>
+                                                    <div class="ml-12">
+                                                        <mat-slider min="0" max="1" step="0.1" *ngIf="showVolumeIcon">
+                                                            <input matSliderThumb (input)="onVolumeChange()"
+                                                                [(ngModel)]="volumeValue">
+                                                        </mat-slider>
+                                                    </div>
+                                                </span>
+                                            </div>
+                                        </mat-card>
+
+                                        <div class="flex justify-center" *ngIf="isSearchPage">
+                                            <button mat-icon-button class="cursor-pointer" (click)="toggleFavorite()">
                                                 <mat-icon>{{ isFavorite ? 'favorite' : 'favorite_border' }}</mat-icon>
                                             </button>
                                         </div>
+                                    </div>
 
-                                    </mat-card>
-                                </div>
-                                <div class="flex justify-center mt-16">
-                                    <button mat-mini-fab color="warn"
-                                        aria-label="Example icon button with a filter list icon"
-                                        (click)="closeModal()"><mat-icon>close</mat-icon> </button>
+                                    <div class="flex justify-center mt-16">
+                                        <button mat-mini-fab color="warn"
+                                            aria-label="Example icon button with a filter list icon"
+                                            (click)="closeModal()"><mat-icon>close</mat-icon> </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </mat-card-content>
-            </li>
-        </ul>
-    </mat-card-content>
-</mat-card>
+                    </mat-card-content>
+                </li>
+            </ul>
+        </mat-card-content>
+    </mat-card>
+
+</div>
+
+<div *ngIf="isFavoritePage">
+    <mat-card *ngIf="spotifyTracks2.length > 0" class="relative mt-10">
+        <mat-card-content>
+            <ul class="list-none p-0 flex flex-wrap">
+                <li *ngFor="let track of spotifyTracks2; let i = index"
+                    class="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/4">
+                    <mat-card-content class="flex items-center">
+                        <img *ngIf="track.image" [src]="track.image" alt="Album Art"
+                            class="mr-4 w-52 h-52 cursor-pointer" (click)="selectTrack(track)" />
+                        <div *ngIf="showContent" class="modal-overlay">
+                            <div class="modal-content w-2/5">
+                                <div *ngIf="selectedTrack">
+                                    <div class="flex justify-center">
+                                        <img *ngIf="selectedTrack.image" [src]="selectedTrack.image" alt="Album Art"
+                                            class="mr-4 w-52 h-52 cursor-pointer">
+                                    </div>
+                                    <div class="mt-4">
+
+                                        <p><strong>Name:</strong> {{ selectedTrack.name }}</p>
+                                        <p><strong>Artists:</strong> {{ selectedTrack.artists }}</p>
+                                        <p><strong>Album:</strong> {{ selectedTrack.album }}</p>
+
+
+                                        <mat-card class="w-full h-12 mt-3 rounded-full"
+                                            *ngIf="selectedTrack.preview_url">
+                                            <div class="flex items-center h-full">
+
+                                                <button mat-icon-button class="cursor-pointer flex items-center"
+                                                    (click)="toggleAudio()">
+                                                    <mat-icon>{{ isPlaying ? 'stop' : 'play_arrow' }}</mat-icon>
+                                                </button>
+
+                                                <span class="ml-2">
+                                                    {{currentTimeDisplay}} / {{endTimeDisplay}}
+                                                </span>
+
+                                                <span class="ml-2">
+                                                    <mat-slider min="0" max="29" step="1" class="mt-3">
+                                                        <input matSliderThumb [(ngModel)]="secondsValue"
+                                                            (input)="onSecondsChange()">
+                                                    </mat-slider>
+                                                </span>
+
+                                                <span (mouseenter)="onSliderMouseEnter()"
+                                                    (mouseleave)="onSliderMouseLeave()">
+                                                    <button mat-icon-button class="volume cursor-pointer"
+                                                        (dblclick)="toggleMute()">
+                                                        <mat-icon>{{ getVolumeIcon() }}</mat-icon>
+                                                    </button>
+                                                    <div class="ml-12">
+                                                        <mat-slider min="0" max="1" step="0.1" *ngIf="showVolumeIcon">
+                                                            <input matSliderThumb (input)="onVolumeChange()"
+                                                                [(ngModel)]="volumeValue">
+                                                        </mat-slider>
+                                                    </div>
+                                                </span>
+                                            </div>
+                                        </mat-card>
+
+                                        <div class="flex justify-center mt-16">
+                                            <button mat-mini-fab color="warn"
+                                                (click)="deleteFavoriteSong(selectedTrack._id)">
+                                                <mat-icon>delete_outline</mat-icon>
+                                            </button>
+
+                                            <button mat-mini-fab color="warn" class="ml-10"
+                                                aria-label="Example icon button with a filter list icon"
+                                                (click)="closeModal()"><mat-icon>close</mat-icon>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </li>
+            </ul>
+        </mat-card-content>
+    </mat-card>
+</div>

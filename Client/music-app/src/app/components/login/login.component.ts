@@ -34,7 +34,7 @@ export class LoginComponent {
         this.cookieService.set('token', res.token)
         this.cookieService.set('userId', JSON.stringify(res.userLogin._id))
 
-        this.router.navigate(['spotify']);
+        this.router.navigate(['search']);
         this.loginForm.reset();
         this.alertService.success('Success', res.message, `Status code: ${res.statusCode}`);
         console.log(res);

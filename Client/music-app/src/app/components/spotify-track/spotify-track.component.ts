@@ -3,6 +3,7 @@ import { SpotifyTrack } from 'src/app/models/SpotifyTrack';
 import { AudioService } from 'src/app/services/audio.service';
 import { SpotifyTrackService } from 'src/app/services/spotify-track.service';
 import { CookieService } from 'ngx-cookie-service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-spotify-track',
@@ -13,6 +14,7 @@ import { CookieService } from 'ngx-cookie-service';
 export class SpotifyTrackComponent implements OnInit {
 
   spotifyTracks: SpotifyTrack[] = [];
+  spotifyTracks2: SpotifyTrack[] = [];
   spotifyTrack!: SpotifyTrack;
   keyword: string = "";
   currentAudio: HTMLAudioElement | null = null;
@@ -27,12 +29,16 @@ export class SpotifyTrackComponent implements OnInit {
   showVolumeIcon: boolean = false;
   userId: string = "";
   isFavorite: boolean = false;
+  isSearchPage: boolean = false;
+  isFavoritePage: boolean = false;
+  spotifyTrack2!: SpotifyTrack;
 
   constructor(private spotifyService: SpotifyTrackService, private audioService: AudioService
-    , private cookieService: CookieService) { }
+    , private cookieService: CookieService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.searchSongs(this.keyword);
+    this.getSongsByUser();
 
     const storedTrack = this.cookieService.get('selectedTrack');
     this.userId = this.cookieService.get('userId');
@@ -45,12 +51,29 @@ export class SpotifyTrackComponent implements OnInit {
     setInterval(() => {
       this.updateSliderPosition();
     }, 1000);
+
+    this.route.url.subscribe(urlSegments => {
+      this.isSearchPage = urlSegments.some(segment => segment.path === 'search');
+      this.isFavoritePage = urlSegments.some(segment => segment.path === 'favorite');
+
+      if (this.isSearchPage) {
+        this.searchSongs(this.keyword);
+      } else if (this.isFavoritePage) {
+        this.getSongsByUser();
+      }
+    });
   }
 
   searchSongs(keyword: string) {
-    this.spotifyService.searchSongs(keyword).subscribe((spotifyTrack) => {
-      this.spotifyTracks = spotifyTrack;
+    this.spotifyService.searchSongs(keyword).subscribe((spotifyTracks) => {
+      this.spotifyTracks = spotifyTracks;
     })
+  }
+
+  getSongsByUser() {
+    this.spotifyService.getSongsByUser(this.userId).subscribe((spotifyTracks2) => {
+      this.spotifyTracks2 = spotifyTracks2.filter(track => track.isFavorite === true);
+    });
   }
 
   onInputFocus() {
@@ -77,6 +100,7 @@ export class SpotifyTrackComponent implements OnInit {
     }
     this.volumeValue = 0.5;
     this.secondsValue = 0;
+    this.isFavorite = false;
   }
 
 
@@ -176,17 +200,12 @@ export class SpotifyTrackComponent implements OnInit {
   }
 
   addFavoriteSong() {
-    try {
-      this.spotifyTrack = JSON.parse(this.cookieService.get('selectedTrack'));
-    } catch (error) {
-      console.error('Error parsing JSON from cookie:', error);
-      return;
-    }
+    this.spotifyTrack = JSON.parse(this.cookieService.get('selectedTrack'));
 
     this.spotifyService.addFavoriteSong(this.userId, this.spotifyTrack).subscribe(
       (spotifyTrack: SpotifyTrack) => {
+        this.spotifyTrack.isFavorite = this.isFavorite;
         this.spotifyTrack = spotifyTrack;
-        console.log('Song added to favorites:', this.spotifyTrack);
       },
       (error) => {
         console.error('Error adding favorite song:', error);
@@ -194,8 +213,35 @@ export class SpotifyTrackComponent implements OnInit {
     );
   }
 
+  isFavoriteSong() {
+    this.spotifyService.isFavoriteSong(this.userId, this.spotifyTrack._id, this.isFavorite).subscribe(
+      (spotifyTrack: SpotifyTrack) => {
+        this.spotifyTrack = spotifyTrack;
+      },
+      (error) => {
+        console.error('Error updating isFavorite status:', error);
+      }
+    );
+  }
+
   toggleFavorite() {
     this.isFavorite = !this.isFavorite;
     this.addFavoriteSong();
+    this.isFavoriteSong();
   }
+
+  deleteFavoriteSong(id: string) {
+    this.spotifyService.deleteFavoriteSong(id).subscribe(() => {
+      this.spotifyTracks2 = this.spotifyTracks2.filter(song => song._id !== id);
+      this.closeModal();
+    });
+  }
+
+  checkIsFavorite() {
+
+    // this.spotifyTracks = spotifyTracks.filter(track => track.isFavorite === true);
+
+
+  }
+
 }

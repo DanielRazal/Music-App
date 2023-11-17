@@ -25,7 +25,23 @@ export class SpotifyTrackService {
 
   addFavoriteSong(userId: string, track: SpotifyTrack): Observable<SpotifyTrack> {
     const url = `http://localhost:3001/Music/${userId}`;
-    return this.http.post<SpotifyTrack>(url, track, { headers: { 'Content-Type': 'application/json' } });
-}
+    return this.http.post<SpotifyTrack>(url, track, this.headers());
+  }
+
+  isFavoriteSong(userId: string, songId: string, isFavorite: boolean): Observable<SpotifyTrack> {
+    const url = `http://localhost:3001/Music/${userId}/${songId}`;
+    const requestBody = { isFavorite: isFavorite };
+    return this.http.patch<SpotifyTrack>(url, requestBody, this.headers());
+  }
+
+  getSongsByUser(userId: string): Observable<SpotifyTrack[]> {
+    const url = `http://localhost:3001/Music/${userId}`;
+    return this.http.get<SpotifyTrack[]>(url);
+  }
+
+  deleteFavoriteSong(id: string): Observable<SpotifyTrack> {
+    const url = `http://localhost:3001/Music/${id}`;
+    return this.http.delete<SpotifyTrack>(url);
+  }
 
 }

@@ -1,0 +1,8 @@
+<mat-form-field>
+    <mat-label><mat-icon>menu</mat-icon></mat-label>
+    <mat-select>
+        <mat-option routerLink="/search" value="Search Songs">Search Songs</mat-option>
+        <mat-option routerLink="/favorite" value="Favorite Songs">Favorite Songs</mat-option>
+        <mat-option routerLink="/login" (click)="logOut()" value="LogOut">LogOut</mat-option>
+    </mat-select>
+</mat-form-field>
