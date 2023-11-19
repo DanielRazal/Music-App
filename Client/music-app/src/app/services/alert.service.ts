@@ -25,4 +25,14 @@ export class AlertService {
       footer: footer
     });
   }
+
+  delete(): Promise<any> {
+    return Swal.fire({
+      title: 'Are you sure?',
+      html: '<strong>This action cannot be undone.</strong>',
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    });
+  }
 }

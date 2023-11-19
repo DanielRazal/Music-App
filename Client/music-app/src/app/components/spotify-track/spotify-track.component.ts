@@ -236,12 +236,4 @@ export class SpotifyTrackComponent implements OnInit {
       this.closeModal();
     });
   }
-
-  checkIsFavorite() {
-
-    // this.spotifyTracks = spotifyTracks.filter(track => track.isFavorite === true);
-
-
-  }
-
 }

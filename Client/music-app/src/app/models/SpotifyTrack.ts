@@ -7,4 +7,6 @@ export class SpotifyTrack {
     image: string = "";
     isFavorite: boolean = false;
     songId: string = "";
+    message: string = "";
+    statusCode: string = ""
 }

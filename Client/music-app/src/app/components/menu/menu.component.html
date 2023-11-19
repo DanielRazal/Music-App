@@ -3,6 +3,10 @@
     <mat-select>
         <mat-option routerLink="/search" value="Search Songs">Search Songs</mat-option>
         <mat-option routerLink="/favorite" value="Favorite Songs">Favorite Songs</mat-option>
-        <mat-option routerLink="/login" (click)="logOut()" value="LogOut">LogOut</mat-option>
+        <mat-option value="Delete All Songs" (click)="deleteSongsByUser()">Delete All Songs</mat-option>
+        <mat-option value="Delete User" (click)="deleteUser()">Delete User</mat-option>
+        <mat-option (click)="logOut()" value="LogOut">LogOut</mat-option>
     </mat-select>
 </mat-form-field>
+
+<!-- Screen Width: {{ screenWidth }}px -->

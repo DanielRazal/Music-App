@@ -3,5 +3,7 @@ export const environment = {
     baseUrl: 'http://localhost:3001',
     user: "/User",
     register: "/Register",
-    login: "/Login"
+    login: "/Login",
+    music:"/Music",
+    search:"/search"
 };

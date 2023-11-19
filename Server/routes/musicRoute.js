@@ -5,6 +5,7 @@ const getAccessToken = require('../token/getToken');
 const asyncHandler = require("../helpers/asyncHandler");
 const Song = require('../models/song');
 const mongoose = require('mongoose');
+const User = require('../models/user');
 
 require('dotenv').config();
 
@@ -47,8 +48,25 @@ router.get('/search/:keyword', asyncHandler(async (req, res) => {
 }));
 
 
+router.delete('/user/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId.replace(/"/g, '');
+        const result = await Song.deleteMany({ user: userId });
+
+        if (result.deletedCount === 0) {
+            res.status(400).send({ message: `No songs found for this user` });
+        } else {
+            res.send({ message: `${result.deletedCount} songs deleted for this user`, statusCode: 200,  });
+        }
+    } catch (error) {
+        console.error('Error deleting songs:', error.message);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 router.delete('/', async (req, res) => {
     try {
+
         const result = await Song.deleteMany({});
 
         res.send(`${result.deletedCount} songs deleted.`);

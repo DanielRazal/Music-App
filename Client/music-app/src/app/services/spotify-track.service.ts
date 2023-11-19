@@ -2,12 +2,17 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SpotifyTrack } from '../models/SpotifyTrack';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpotifyTrackService {
 
+  private baseUrl = environment.baseUrl;
+  private musicApi = environment.music;
+  private search = environment.search;
+  private userApi = environment.user;
   constructor(private http: HttpClient) { }
 
   private headers() {
@@ -18,30 +23,30 @@ export class SpotifyTrackService {
     return httpOptions;
   }
 
+
   searchSongs(keyword: string): Observable<SpotifyTrack[]> {
-    const url = `http://localhost:3001/Music/search/${keyword}`;
-    return this.http.get<SpotifyTrack[]>(url);
+    return this.http.get<SpotifyTrack[]>(this.baseUrl + this.musicApi + this.search + "/" + keyword);
   }
 
   addFavoriteSong(userId: string, track: SpotifyTrack): Observable<SpotifyTrack> {
-    const url = `http://localhost:3001/Music/${userId}`;
-    return this.http.post<SpotifyTrack>(url, track, this.headers());
+    return this.http.post<SpotifyTrack>(this.baseUrl + this.musicApi + "/" + userId, track, this.headers());
   }
 
   isFavoriteSong(userId: string, songId: string, isFavorite: boolean): Observable<SpotifyTrack> {
-    const url = `http://localhost:3001/Music/${userId}/${songId}`;
     const requestBody = { isFavorite: isFavorite };
-    return this.http.patch<SpotifyTrack>(url, requestBody, this.headers());
+    return this.http.patch<SpotifyTrack>
+      (this.baseUrl + this.musicApi + "/" + userId + "/" + songId, requestBody, this.headers());
   }
 
   getSongsByUser(userId: string): Observable<SpotifyTrack[]> {
-    const url = `http://localhost:3001/Music/${userId}`;
-    return this.http.get<SpotifyTrack[]>(url);
+    return this.http.get<SpotifyTrack[]>(this.baseUrl + this.musicApi + "/" + userId);
   }
 
   deleteFavoriteSong(id: string): Observable<SpotifyTrack> {
-    const url = `http://localhost:3001/Music/${id}`;
-    return this.http.delete<SpotifyTrack>(url);
+    return this.http.delete<SpotifyTrack>(this.baseUrl + this.musicApi + "/" + id);
   }
 
+  deleteSongsByUser(userId: string): Observable<SpotifyTrack[]> {
+    return this.http.delete<SpotifyTrack[]>(this.baseUrl + this.musicApi + this.userApi + "/" + userId);
+  }
 }

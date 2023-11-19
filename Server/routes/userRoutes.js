@@ -4,6 +4,7 @@ const asyncHandler = require("../helpers/asyncHandler");
 const User = require('../models/user');
 const handleErrors = require("../errors/handleErrors");
 const jwtToken = require("../token/jwtToken");
+const Song = require('../models/song');
 
 // Getting all
 router.get('/', asyncHandler(async (req, res) => {
@@ -68,15 +69,23 @@ router.delete('/', asyncHandler(async (req, res) => {
 }));
 
 // Getting One
-router.get('/:id', asyncHandler(async (req, res) => {
+router.delete('/:userId', asyncHandler(async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ message: `Cannot find ${User.modelName} with id ${req.params.id}` });
+        const userId = req.params.userId.replace(/"/g, '');
+
+        await Song.deleteMany({ user: userId });
+
+        const deleteUserResult = await User.findByIdAndDelete(userId);
+
+        if (!deleteUserResult) {
+            return res.status(404).json({ message: `Cannot find ${User.modelName}` });
         }
-        res.json(user);
+
+        res.json({ message: `User has been deleted successfully.`, statusCode: 200 });
+
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error('Error deleting user and songs:', err.message);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 }));
 
