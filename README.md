@@ -35,9 +35,12 @@ SPOTIFY_SEARCH=https://api.spotify.com/v1/search
 
 SPOTIFY_TOKEN=https://accounts.spotify.com/api/token
 
-4. You need to connect to a Spotify developer account and get your token and add them to **.env**:
+4. You need to connect to a Spotify developer account and get your token and add them to `.env`:
+
 **CLIENT_ID=your_client_id**
+
 and
+
 **CLIENT_SECRET=your_client_secret**
 
 
