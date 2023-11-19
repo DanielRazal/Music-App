@@ -28,8 +28,6 @@ export class ErrorService {
           currentIndex++;
         }
       };
-
-      // Initial display
       displayNextError();
     }
 

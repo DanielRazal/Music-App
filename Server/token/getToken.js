@@ -3,7 +3,7 @@ const axios = require('axios');
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-
+const spotifyToken = process.env.SPOTIFY_TOKEN;
 
 // Get access token function
 async function getAccessToken() {
@@ -11,7 +11,7 @@ async function getAccessToken() {
     const authBase64 = Buffer.from(authString, 'utf-8').toString('base64');
 
     const authOptions = {
-        url: 'https://accounts.spotify.com/api/token',
+        url: spotifyToken,
         method: 'post',
         headers: {
             'Authorization': 'Basic ' + authBase64,

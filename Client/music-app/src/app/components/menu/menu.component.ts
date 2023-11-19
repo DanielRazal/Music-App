@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { AlertService } from 'src/app/services/alert.service';
@@ -20,8 +20,6 @@ export class MenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.userId = this.cookieService.get('userId');
-    this.updateScreenWidth();
-
   }
 
   logOut() {
@@ -64,16 +62,5 @@ export class MenuComponent implements OnInit {
         }
       }
     })
-  }
-
-  screenWidth: number | undefined;
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: Event): void {
-    this.updateScreenWidth();
-  }
-
-  private updateScreenWidth(): void {
-    this.screenWidth = window.innerWidth;
   }
 }

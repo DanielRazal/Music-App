@@ -5,10 +5,11 @@ const getAccessToken = require('../token/getToken');
 const asyncHandler = require("../helpers/asyncHandler");
 const Song = require('../models/song');
 const mongoose = require('mongoose');
-const User = require('../models/user');
-
 require('dotenv').config();
 
+const spotifySearch = process.env.SPOTIFY_SEARCH;
+
+//Search Songs
 router.get('/search/:keyword', asyncHandler(async (req, res) => {
 
     const { keyword } = req.params;
@@ -17,7 +18,7 @@ router.get('/search/:keyword', asyncHandler(async (req, res) => {
         const accessToken = await getAccessToken();
 
         const searchOptions = {
-            url: 'https://api.spotify.com/v1/search',
+            url: spotifySearch,
             method: 'get',
             headers: {
                 'Authorization': 'Bearer ' + accessToken,
@@ -48,6 +49,7 @@ router.get('/search/:keyword', asyncHandler(async (req, res) => {
 }));
 
 
+// Delete Songs by User
 router.delete('/user/:userId', async (req, res) => {
     try {
         const userId = req.params.userId.replace(/"/g, '');
@@ -56,7 +58,7 @@ router.delete('/user/:userId', async (req, res) => {
         if (result.deletedCount === 0) {
             res.status(400).send({ message: `No songs found for this user` });
         } else {
-            res.send({ message: `${result.deletedCount} songs deleted for this user`, statusCode: 200,  });
+            res.send({ message: `${result.deletedCount} songs deleted for this user`, statusCode: 200, });
         }
     } catch (error) {
         console.error('Error deleting songs:', error.message);
@@ -64,6 +66,7 @@ router.delete('/user/:userId', async (req, res) => {
     }
 });
 
+// Delete Songs
 router.delete('/', async (req, res) => {
     try {
 
@@ -77,6 +80,7 @@ router.delete('/', async (req, res) => {
     }
 });
 
+// Add Favorite Song to User
 router.post('/:userId', asyncHandler(async (req, res) => {
     const { id, name, artists, album, preview_url, image } = req.body;
     let userId = req.params.userId;
@@ -111,7 +115,7 @@ router.post('/:userId', asyncHandler(async (req, res) => {
     }
 }));
 
-
+// Edit Song (isFavorite)
 router.patch('/:userId/:songId', asyncHandler(async (req, res) => {
     const { isFavorite } = req.body;
     let userId = req.params.userId;
@@ -137,6 +141,7 @@ router.patch('/:userId/:songId', asyncHandler(async (req, res) => {
     }
 }));
 
+// Get Songs by UserId 
 router.get('/:userId', asyncHandler(async (req, res) => {
     try {
         const userId = req.params.userId.replace(/"/g, '');
@@ -154,7 +159,7 @@ router.get('/:userId', asyncHandler(async (req, res) => {
     }
 }));
 
-
+// Delete Song by Id
 router.delete('/:id', asyncHandler(async (req, res) => {
     const id = req.params.id;
 

@@ -5,6 +5,4 @@ import { Component } from '@angular/core';
   templateUrl: './my-favorite-songs.component.html',
   styleUrls: ['./my-favorite-songs.component.css']
 })
-export class MyFavoriteSongsComponent {
-  
-}
+export class MyFavoriteSongsComponent { }
